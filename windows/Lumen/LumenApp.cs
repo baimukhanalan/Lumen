@@ -202,6 +202,9 @@ public sealed class LumenApp : IDisposable
     /// <summary>Applies the decision to the OS and UI. Runs on the UI thread.</summary>
     private void Apply(DetectionResult result, AppConfig cfg)
     {
+        if (_disposed)
+            return;
+
         bool awake = result.ShouldStayAwake;
 
         _power.Apply(awake);
