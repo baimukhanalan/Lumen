@@ -14,6 +14,23 @@ guard #available(macOS 12.0, *) else {
     exit(1)
 }
 
+// Single-instance guard. If another copy of Lumen is already running, ask it to
+// surface its Settings window (so the user sees *something* happen) and then
+// bail out — only one menu-bar item should ever exist.
+let bundleID = Bundle.main.bundleIdentifier ?? "com.lumen.app"
+let others = NSRunningApplication
+    .runningApplications(withBundleIdentifier: bundleID)
+    .filter { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }
+if !others.isEmpty {
+    DistributedNotificationCenter.default().postNotificationName(
+        AppDelegate.openSettingsNotification,
+        object: nil,
+        userInfo: nil,
+        deliverImmediately: true
+    )
+    exit(0)
+}
+
 // NSApplication.delegate is weak; hold a strong reference for the app's life.
 let delegate = AppDelegate()
 app.delegate = delegate

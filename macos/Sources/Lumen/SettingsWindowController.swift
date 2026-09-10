@@ -4,8 +4,13 @@ import LumenCore
 
 /// Hosts the SwiftUI `SettingsView` inside a standard `NSWindow` via
 /// `NSHostingController`. A single window instance is reused and re-fronted.
+///
+/// Because the app runs as an `.accessory` (no Dock icon), we temporarily
+/// promote it to `.regular` while the window is visible. That lets the window
+/// become key/main and gives it a proper Dock presence and app menu; we drop
+/// back to `.accessory` when it closes so the app stays menu-bar-only.
 @available(macOS 12.0, *)
-final class SettingsWindowController: NSWindowController {
+final class SettingsWindowController: NSWindowController, NSWindowDelegate {
 
     private let model = ConfigModel()
     private let loc: Localizer
@@ -14,7 +19,7 @@ final class SettingsWindowController: NSWindowController {
         self.loc = loc
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 460, height: 360),
+            contentRect: NSRect(x: 0, y: 0, width: 520, height: 560),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
@@ -24,6 +29,7 @@ final class SettingsWindowController: NSWindowController {
         window.center()
         super.init(window: window)
 
+        window.delegate = self
         rebuildContent()
     }
 
@@ -41,13 +47,25 @@ final class SettingsWindowController: NSWindowController {
             daemonInstalled: PrivilegedInstaller.isInstalled
         )
         window?.contentViewController = NSHostingController(rootView: root)
+        window?.title = loc.string("window.settings")
     }
 
     func show() {
         rebuildContent()
+        // Promote to a regular app so the accessory window can take focus and
+        // sit in front like a normal Settings window.
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         showWindow(nil)
+        window?.center()
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    // MARK: - NSWindowDelegate
+
+    func windowWillClose(_ notification: Notification) {
+        // Return to menu-bar-only once the window is dismissed.
+        NSApp.setActivationPolicy(.accessory)
     }
 
     private func install() {

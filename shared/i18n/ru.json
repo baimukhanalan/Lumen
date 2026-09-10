@@ -25,7 +25,31 @@
 
   "lang.system": "Системный",
   "value.noLimit": "Без ограничения",
+  "value.onAC": "От сети",
+  "value.onBattery": "Батарея",
+  "value.yes": "Обнаружена",
+  "value.no": "Нет",
 
+  "label.battery": "Батарея",
+  "label.thermal": "Нагрев",
+  "label.session": "Сессия агента",
+
+  "thermal.nominal": "Норма",
+  "thermal.fair": "Умеренный",
+  "thermal.serious": "Высокий",
+  "thermal.critical": "Критический",
+
+  "section.behavior": "Поведение",
+  "section.timing": "Тайминг",
+  "section.appearance": "Оформление",
+  "section.sessions": "Сессии агентов",
+  "section.processes": "Активность процессов",
+  "section.power": "Ограничения питания",
+  "section.duration": "Длительность",
+
+  "hint.mode": "Авто следует за активностью агента. Держать бодрым и Удалённый удерживают Mac; Разрешить сон отменяет всё.",
+  "hint.timing": "Сколько бездействовать перед сном и как часто Lumen проверяет.",
+  "hint.sessions": "Следит за журналами сессий Claude Code и Codex на недавнюю активность.",
   "hint.language": "Изменения применятся при следующем запуске приложения.",
   "hint.processList": "Имена процессов через запятую, напр. ollama, docker, node.",
   "hint.safety": "Защиты могут только разрешить сон — они не удерживают Mac бодрым вопреки этим лимитам.",
@@ -37,10 +61,12 @@
   "about.reinstall": "Переустановить / обновить демон…",
   "about.uninstall": "Удалить демон…",
   "about.privilege": "Lumen один раз устанавливает небольшой root-демон с одним запросом пароля администратора macOS. Повседневное управление пароля не требует.",
+  "about.github": "Открыть на GitHub",
 
   "menu.timed": "Сессия по таймеру",
   "menu.timedStop": "Остановить таймер",
   "menu.settings": "Настройки…",
+  "menu.open": "Открыть Lumen…",
   "menu.quit": "Выйти из Lumen",
 
   "timed.15m": "15 минут",

@@ -25,7 +25,31 @@
 
   "lang.system": "Жүйелік",
   "value.noLimit": "Шектеусіз",
+  "value.onAC": "Желіден",
+  "value.onBattery": "Батарея",
+  "value.yes": "Анықталды",
+  "value.no": "Жоқ",
 
+  "label.battery": "Батарея",
+  "label.thermal": "Қызу",
+  "label.session": "Агент сессиясы",
+
+  "thermal.nominal": "Қалыпты",
+  "thermal.fair": "Орташа",
+  "thermal.serious": "Жоғары",
+  "thermal.critical": "Аса жоғары",
+
+  "section.behavior": "Мінез-құлық",
+  "section.timing": "Уақыт",
+  "section.appearance": "Сыртқы түрі",
+  "section.sessions": "Агент сессиялары",
+  "section.processes": "Процесс белсенділігі",
+  "section.power": "Қуат шектеулері",
+  "section.duration": "Ұзақтығы",
+
+  "hint.mode": "Авто агент белсенділігіне сүйенеді. Ояу ұстау мен Қашықтан Mac-ты ояу ұстайды; Ұйқыға рұқсат бәрін басып озады.",
+  "hint.timing": "Ұйқыға дейінгі әрекетсіздік уақыты және Lumen тексеру жиілігі.",
+  "hint.sessions": "Claude Code пен Codex сессия журналдарын соңғы белсенділікке бақылайды.",
   "hint.language": "Өзгерістер бағдарлама келесі рет іске қосылғанда қолданылады.",
   "hint.processList": "Процесс атаулары үтірмен, мыс. ollama, docker, node.",
   "hint.safety": "Қорғаныстар тек ұйқыға рұқсат бере алады — олар Mac-ты бұл шектерге қарсы ояу ұстамайды.",
@@ -37,10 +61,12 @@
   "about.reinstall": "Демонды қайта орнату / жаңарту…",
   "about.uninstall": "Демонды жою…",
   "about.privilege": "Lumen шағын root-демонды бір рет, macOS әкімші паролін бір сұрап орнатады. Күнделікті басқаруға пароль қажет емес.",
+  "about.github": "GitHub-та ашу",
 
   "menu.timed": "Таймермен сессия",
   "menu.timedStop": "Таймерді тоқтату",
   "menu.settings": "Баптаулар…",
+  "menu.open": "Lumen ашу…",
   "menu.quit": "Lumen-нен шығу",
 
   "timed.15m": "15 минут",

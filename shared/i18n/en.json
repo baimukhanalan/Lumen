@@ -25,7 +25,31 @@
 
   "lang.system": "System",
   "value.noLimit": "No limit",
+  "value.onAC": "AC power",
+  "value.onBattery": "Battery",
+  "value.yes": "Detected",
+  "value.no": "None",
 
+  "label.battery": "Battery",
+  "label.thermal": "Thermal",
+  "label.session": "Agent session",
+
+  "thermal.nominal": "Normal",
+  "thermal.fair": "Fair",
+  "thermal.serious": "Serious",
+  "thermal.critical": "Critical",
+
+  "section.behavior": "Behavior",
+  "section.timing": "Timing",
+  "section.appearance": "Appearance",
+  "section.sessions": "Agent sessions",
+  "section.processes": "Process activity",
+  "section.power": "Power limits",
+  "section.duration": "Duration",
+
+  "hint.mode": "Auto follows detected agent activity. Keep awake and Remote hold the Mac awake; Allow sleep overrides everything.",
+  "hint.timing": "How long activity must be idle before sleeping, and how often Lumen checks.",
+  "hint.sessions": "Watches Claude Code and Codex session logs for recent activity.",
   "hint.language": "Changes apply the next time the app launches.",
   "hint.processList": "Comma-separated executable names, e.g. ollama, docker, node.",
   "hint.safety": "Governors can only allow sleep — they never keep the Mac awake against these limits.",
@@ -37,10 +61,12 @@
   "about.reinstall": "Reinstall / update daemon…",
   "about.uninstall": "Remove daemon…",
   "about.privilege": "Lumen installs a small root LaunchDaemon once, using a single macOS administrator prompt. Day-to-day controls need no password.",
+  "about.github": "View on GitHub",
 
   "menu.timed": "Timed session",
   "menu.timedStop": "Stop timed session",
   "menu.settings": "Settings…",
+  "menu.open": "Open Lumen…",
   "menu.quit": "Quit Lumen",
 
   "timed.15m": "15 minutes",

@@ -2,7 +2,7 @@ import AppKit
 import LumenCore
 
 /// Owns the menu-bar `NSStatusItem`: the live-state icon and the status menu.
-/// Polls the daemon's state file to keep the icon and status line current.
+/// Polls the daemon's state file to keep the icon and status header current.
 final class StatusItemController: NSObject, NSMenuDelegate {
 
     private let statusItem: NSStatusItem
@@ -14,14 +14,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private var pollTimer: Timer?
 
-    // Menu items we mutate on refresh.
-    private let statusLine = NSMenuItem()
-    private let reasonLine = NSMenuItem()
+    // Items we mutate on refresh.
+    private let headerItem = NSMenuItem()
     private var modeItems: [LumenMode: NSMenuItem] = [:]
     private let stopTimedItem = NSMenuItem()
-
-    /// Visual states for the icon.
-    private enum IconState { case awake, armed, paused, unavailable }
 
     init(loc: Localizer,
          onOpenSettings: @escaping () -> Void,
@@ -44,10 +40,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
 
-        statusLine.isEnabled = false
-        reasonLine.isEnabled = false
-        menu.addItem(statusLine)
-        menu.addItem(reasonLine)
+        // Rich, non-clickable status header (icon + title + detail lines).
+        headerItem.isEnabled = false
+        menu.addItem(headerItem)
         menu.addItem(.separator())
 
         // Modes (radio-style checkmarks).
@@ -59,6 +54,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         // Timed session submenu.
         let timed = NSMenuItem(title: loc.string("menu.timed"), action: nil, keyEquivalent: "")
+        timed.image = symbolImage("timer", pointSize: 13)
         let timedMenu = NSMenu()
         for (index, preset) in ControlWriter.timedPresets.enumerated() {
             let item = NSMenuItem(title: loc.string(preset.labelKey),
@@ -77,9 +73,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(timed)
         menu.addItem(.separator())
 
-        let settings = NSMenuItem(title: loc.string("menu.settings"),
+        let settings = NSMenuItem(title: loc.string("menu.open"),
                                   action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
+        settings.image = symbolImage("slider.horizontal.3", pointSize: 13)
         menu.addItem(settings)
 
         let quit = NSMenuItem(title: loc.string("menu.quit"),
@@ -116,13 +113,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private func refresh() {
         let config = ConfigStore.load(at: paths.configFile)
         let state = StateStore.load(at: paths.stateFile)
-        let fresh = isFresh(state)
+        let pres = StatePresentation.resolve(config: config, state: state, loc: loc)
 
-        // Icon + status text.
-        let iconState = resolveIconState(config: config, state: state, fresh: fresh)
-        applyIcon(iconState)
-        statusLine.title = statusText(iconState: iconState, config: config, state: state, fresh: fresh)
-        reasonLine.title = reasonText(state: state, fresh: fresh, config: config)
+        // Menu-bar icon: monochrome template symbol reflecting the state.
+        applyIcon(pres.ui)
+
+        // Rich header: tinted symbol + bold title + secondary detail lines.
+        headerItem.image = symbolImage(pres.ui.symbol, pointSize: 18, tint: pres.ui.tint)
+        headerItem.attributedTitle = headerText(pres: pres, config: config, state: state)
 
         // Mode checkmarks.
         for (mode, item) in modeItems {
@@ -134,59 +132,84 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         stopTimedItem.isHidden = !timedActive
     }
 
-    private func isFresh(_ state: DaemonState?) -> Bool {
-        guard let state else { return false }
-        // Consider stale if older than ~4 polls (defensive; daemon may be down).
-        return Date().timeIntervalSince1970 - state.updatedAt < 90
-    }
+    // MARK: - Icon + header rendering
 
-    private func resolveIconState(config: LumenConfig, state: DaemonState?, fresh: Bool) -> IconState {
-        guard fresh, let state else {
-            return PrivilegedInstaller.isInstalled ? .armed : .unavailable
-        }
-        if config.mode == .off { return .paused }
-        if state.sleepDisabled { return .awake }
-        return .armed
-    }
-
-    private func applyIcon(_ state: IconState) {
-        let symbol: String
-        switch state {
-        case .awake: symbol = "bolt.fill"
-        case .armed: symbol = "eye"
-        case .paused: symbol = "moon.zzz.fill"
-        case .unavailable: symbol = "exclamationmark.triangle"
-        }
-        if let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Lumen") {
+    private func applyIcon(_ ui: LumenUIState) {
+        if let image = NSImage(systemSymbolName: ui.symbol, accessibilityDescription: "Lumen") {
             image.isTemplate = true
             statusItem.button?.image = image
         } else {
+            statusItem.button?.image = nil
             statusItem.button?.title = "L"
         }
     }
 
-    private func statusText(iconState: IconState, config: LumenConfig,
-                            state: DaemonState?, fresh: Bool) -> String {
-        switch iconState {
-        case .unavailable: return loc.string("status.notRunning")
-        case .paused: return loc.string("status.paused")
-        case .awake: return loc.string("status.awake")
-        case .armed: return loc.string("status.armed")
+    /// A configured SF Symbol image, optionally tinted with a palette colour.
+    private func symbolImage(_ name: String, pointSize: CGFloat, tint: NSColor? = nil) -> NSImage? {
+        var config = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .semibold)
+        if let tint {
+            config = config.applying(.init(paletteColors: [tint]))
         }
+        let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)?
+            .withSymbolConfiguration(config)
+        image?.isTemplate = (tint == nil)
+        return image
     }
 
-    private func reasonText(state: DaemonState?, fresh: Bool, config: LumenConfig) -> String {
-        if !fresh || state == nil {
-            return PrivilegedInstaller.isInstalled
-                ? loc.string("reason.waiting")
-                : loc.string("reason.notInstalled")
+    /// Builds the multi-line attributed title for the header row.
+    private func headerText(pres: StatePresentation,
+                            config: LumenConfig,
+                            state: DaemonState?) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+
+        let titlePara = NSMutableParagraphStyle()
+        titlePara.lineSpacing = 2
+        titlePara.paragraphSpacing = 3
+
+        result.append(NSAttributedString(string: pres.title, attributes: [
+            .font: NSFont.systemFont(ofSize: 13, weight: .semibold),
+            .foregroundColor: NSColor.labelColor,
+            .paragraphStyle: titlePara,
+        ]))
+
+        let secondary: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: 11, weight: .regular),
+            .foregroundColor: NSColor.secondaryLabelColor,
+            .paragraphStyle: titlePara,
+        ]
+
+        result.append(NSAttributedString(string: "\n" + pres.reason, attributes: secondary))
+
+        if let facts = factsLine(config: config, state: state), !facts.isEmpty {
+            result.append(NSAttributedString(string: "\n" + facts, attributes: secondary))
         }
-        guard let state else { return "" }
-        var detail = state.reason
+        return result
+    }
+
+    /// Compact facts line: power · battery · thermal · session.
+    private func factsLine(config: LumenConfig, state: DaemonState?) -> String? {
+        guard let state, StatePresentation.isFresh(state) else { return nil }
+        var parts: [String] = []
+
+        // Power source (+ battery percentage when available).
         if let pct = state.batteryPercent {
-            detail += state.onBattery ? "  ·  \(pct)% 🔋" : "  ·  \(pct)% ⚡︎"
+            let source = state.onBattery ? loc.string("value.onBattery") : loc.string("value.onAC")
+            parts.append("\(source) \(pct)%")
+        } else {
+            parts.append(state.onBattery ? loc.string("value.onBattery") : loc.string("value.onAC"))
         }
-        return detail
+
+        // Thermal (only worth showing when not nominal).
+        if state.thermal != "nominal" {
+            parts.append(StatePresentation.thermalLabel(state.thermal, loc: loc))
+        }
+
+        // Agent session detected?
+        let detected = state.sessionActive || state.processActive
+        parts.append(loc.string("label.session") + ": " +
+                     loc.string(detected ? "value.yes" : "value.no"))
+
+        return parts.joined(separator: "  ·  ")
     }
 
     // MARK: - Actions
