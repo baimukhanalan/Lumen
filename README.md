@@ -1,5 +1,7 @@
 # Lumen
 
+[![build](https://github.com/baimukhanalan/Lumen/actions/workflows/build.yml/badge.svg)](https://github.com/baimukhanalan/Lumen/actions/workflows/build.yml)
+
 **Keep your laptop awake — with the lid closed — but only while your AI coding agents are actually working.**
 
 Lumen is a small, premium menu-bar / tray utility for **macOS and Windows**. When Claude Code, Codex, Cursor, a local model, or a long build is running, Lumen prevents the machine from sleeping *even when the lid is shut*. The moment the work is done, it lets the machine sleep again to save battery.
@@ -73,10 +75,15 @@ Nightly/CI builds are produced by GitHub Actions on every push (macOS + Windows 
 ## Roadmap
 
 - [x] Proven core: session-activity detection + `pmset disablesleep` + safety governors (macOS prototype).
-- [ ] macOS premium app (menu-bar UI + settings + helper).
-- [ ] Windows app (tray + lid/power + settings).
-- [ ] Installers + auto-update (Sparkle / winget) + code signing.
+- [x] macOS premium app — menu-bar UI + SwiftUI settings + root daemon (builds via `swiftc`, no Xcode).
+- [x] Windows app — .NET 8 tray + `SetThreadExecutionState` + `powercfg` lid policy + WPF settings.
+- [x] CI builds both platforms on every push (macOS `.app` + Windows `.exe` artifacts).
+- [ ] Installers + auto-update (Sparkle / winget) + code signing & notarization.
 - [ ] Localization polish (en/ru/kk).
+
+### Download
+
+Until signed installers ship, grab the latest CI build from the **[Actions tab](https://github.com/baimukhanalan/Lumen/actions/workflows/build.yml)** → newest run → **Artifacts** (`Lumen-macos`, `Lumen-windows`). These are unsigned, so macOS needs right-click → Open once, and Windows may show a SmartScreen "Run anyway".
 
 ## License
 
