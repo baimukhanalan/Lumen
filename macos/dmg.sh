@@ -14,7 +14,9 @@ ROOT="$(cd "$HERE/.." && pwd)"
 APP="$HERE/build/Lumen.app"
 DIST="$ROOT/dist"
 
-VER="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$HERE/Info.plist" 2>/dev/null || echo 1.0.0)"
+# Version: an explicit LUMEN_VERSION (e.g. from the release tag) wins, else the
+# app's Info.plist is the source of truth.
+VER="${LUMEN_VERSION:-$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$HERE/Info.plist" 2>/dev/null || echo 1.0.0)}"
 
 echo "==> Building app"
 "$HERE/build.sh"

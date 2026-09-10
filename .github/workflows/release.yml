@@ -21,7 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build DMG
-        run: ./macos/dmg.sh
+        shell: bash
+        run: |
+          export LUMEN_VERSION="$(echo "${{ github.event.inputs.tag || github.ref_name }}" | sed 's/^v//')"
+          ./macos/dmg.sh
         # Signing/notarization run automatically if these secrets exist:
         env:
           MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
