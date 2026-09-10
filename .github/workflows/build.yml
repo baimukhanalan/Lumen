@@ -1,0 +1,58 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: swift --version
+      - name: Build macOS app
+        run: |
+          if [ -x macos/build.sh ]; then
+            ./macos/build.sh
+          else
+            echo "macos/build.sh not present yet — skipping (scaffold stage)"
+          fi
+      - name: Upload artifact
+        if: hashFiles('macos/build/Lumen.app/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lumen-macos
+          path: macos/build/Lumen.app
+          if-no-files-found: ignore
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Windows app
+        shell: pwsh
+        run: |
+          if (Test-Path windows/Lumen/Lumen.csproj) {
+            dotnet publish windows/Lumen/Lumen.csproj -c Release -r win-x64 --self-contained false -o dist/windows
+          } else {
+            Write-Host "windows/Lumen/Lumen.csproj not present yet — skipping (scaffold stage)"
+          }
+      - name: Upload artifact
+        if: hashFiles('dist/windows/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lumen-windows
+          path: dist/windows
+          if-no-files-found: ignore

@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+macos/build/
+macos/.build/
+*.xcuserstate
+DerivedData/
+
+# Swift
+.swiftpm/
+Package.resolved
+
+# Windows / .NET
+windows/**/bin/
+windows/**/obj/
+*.user
+*.suo
+
+# Node (docs tooling, if any)
+node_modules/
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# Build artifacts
+*.dmg
+*.zip
+dist/
