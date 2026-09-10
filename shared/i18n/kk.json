@@ -1,0 +1,71 @@
+{
+  "tab.general": "Негізгі",
+  "tab.triggers": "Триггерлер",
+  "tab.safety": "Қорғаныс",
+  "tab.about": "Бағдарлама туралы",
+
+  "field.mode": "Режим",
+  "field.language": "Тіл",
+  "field.grace": "Әрекетсіздік терезесі",
+  "field.poll": "Тексеру аралығы",
+  "field.watchClaude": "Claude Code сессияларын бақылау",
+  "field.watchCodex": "Codex сессияларын бақылау",
+  "field.processTriggers": "Процесс пен CPU триггерлері",
+  "field.cpuThreshold": "CPU шегі",
+  "field.processList": "Бақыланатын процестер",
+  "field.batteryFloor": "Батарея шегі",
+  "field.criticalBattery": "Аса төмен заряд",
+  "field.maxHours": "Қатаң шек",
+  "field.acOnly": "Тек желіден қоректенгенде ояу тұру",
+
+  "mode.auto": "Авто",
+  "mode.on": "Ояу ұстау",
+  "mode.off": "Ұйқыға рұқсат",
+  "mode.remote": "Қашықтан",
+
+  "lang.system": "Жүйелік",
+  "value.noLimit": "Шектеусіз",
+
+  "hint.language": "Өзгерістер бағдарлама келесі рет іске қосылғанда қолданылады.",
+  "hint.processList": "Процесс атаулары үтірмен, мыс. ollama, docker, node.",
+  "hint.safety": "Қорғаныстар тек ұйқыға рұқсат бере алады — олар Mac-ты бұл шектерге қарсы ояу ұстамайды.",
+
+  "about.tagline": "Mac-ты тек агент нақты жұмыс істеп тұрғанда ғана ояу ұстайды.",
+  "about.daemonInstalled": "Фондық демон орнатылған.",
+  "about.daemonMissing": "Фондық демон орнатылмаған.",
+  "about.install": "Демонды орнату…",
+  "about.reinstall": "Демонды қайта орнату / жаңарту…",
+  "about.uninstall": "Демонды жою…",
+  "about.privilege": "Lumen шағын root-демонды бір рет, macOS әкімші паролін бір сұрап орнатады. Күнделікті басқаруға пароль қажет емес.",
+
+  "menu.timed": "Таймермен сессия",
+  "menu.timedStop": "Таймерді тоқтату",
+  "menu.settings": "Баптаулар…",
+  "menu.quit": "Lumen-нен шығу",
+
+  "timed.15m": "15 минут",
+  "timed.30m": "30 минут",
+  "timed.1h": "1 сағат",
+  "timed.2h": "2 сағат",
+  "timed.4h": "4 сағат",
+  "timed.8h": "8 сағат",
+
+  "status.notRunning": "Lumen демоны іске қосылмаған",
+  "status.paused": "Кідіріс — ұйқыға рұқсат",
+  "status.awake": "Ояу — ұйқы өшірілген",
+  "status.armed": "Дайын — белсенділікті бақылауда",
+
+  "reason.waiting": "Демон есебін күтудеміз…",
+  "reason.notInstalled": "Демонды орнату үшін Баптаулар › Бағдарлама туралы бөлімін ашыңыз.",
+
+  "window.settings": "Lumen баптаулары",
+
+  "install.firstRunPrompt": "Lumen ұйқыны басқару үшін шағын фондық демон орнатуы қажет. macOS әкімші паролін бір рет сұрайды.",
+  "install.reinstallPrompt": "Lumen фондық демонын қайта орнату немесе жаңарту керек пе? macOS әкімші паролін бір рет сұрайды.",
+  "install.install": "Орнату",
+  "install.later": "Кейінірек",
+
+  "alert.installed": "Lumen демоны орнатылып, іске қосылды.",
+  "alert.uninstalled": "Lumen демоны жойылды.",
+  "alert.failed": "Операцияны аяқтау мүмкін болмады."
+}

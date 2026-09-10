@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Lumen</string>
+    <key>CFBundleDisplayName</key>
+    <string>Lumen</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.lumen.app</string>
+    <key>CFBundleVersion</key>
+    <string>1.0.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>Lumen</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <!-- Menu-bar app: no Dock icon, no main window. -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <key>LSMinimumSystemVersion</key>
+    <string>12.0</string>
+
+    <key>NSHumanReadableCopyright</key>
+    <string>Lumen — keep-awake while agents work.</string>
+
+    <!-- Follows the system appearance (light/dark aware). -->
+    <key>NSRequiresAquaSystemAppearance</key>
+    <false/>
+
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Lumen uses a one-time administrator prompt to install its background helper.</string>
+</dict>
+</plist>

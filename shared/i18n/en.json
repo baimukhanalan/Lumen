@@ -1,0 +1,71 @@
+{
+  "tab.general": "General",
+  "tab.triggers": "Triggers",
+  "tab.safety": "Safety",
+  "tab.about": "About",
+
+  "field.mode": "Mode",
+  "field.language": "Language",
+  "field.grace": "Grace period",
+  "field.poll": "Poll interval",
+  "field.watchClaude": "Watch Claude Code sessions",
+  "field.watchCodex": "Watch Codex sessions",
+  "field.processTriggers": "Enable process + CPU triggers",
+  "field.cpuThreshold": "CPU threshold",
+  "field.processList": "Watched processes",
+  "field.batteryFloor": "Battery floor",
+  "field.criticalBattery": "Critical battery",
+  "field.maxHours": "Hard cap",
+  "field.acOnly": "Keep awake only on AC power",
+
+  "mode.auto": "Auto",
+  "mode.on": "Keep awake",
+  "mode.off": "Allow sleep",
+  "mode.remote": "Remote",
+
+  "lang.system": "System",
+  "value.noLimit": "No limit",
+
+  "hint.language": "Changes apply the next time the app launches.",
+  "hint.processList": "Comma-separated executable names, e.g. ollama, docker, node.",
+  "hint.safety": "Governors can only allow sleep — they never keep the Mac awake against these limits.",
+
+  "about.tagline": "Keeps your Mac awake only while real agent work is happening.",
+  "about.daemonInstalled": "Background daemon is installed.",
+  "about.daemonMissing": "Background daemon is not installed.",
+  "about.install": "Install daemon…",
+  "about.reinstall": "Reinstall / update daemon…",
+  "about.uninstall": "Remove daemon…",
+  "about.privilege": "Lumen installs a small root LaunchDaemon once, using a single macOS administrator prompt. Day-to-day controls need no password.",
+
+  "menu.timed": "Timed session",
+  "menu.timedStop": "Stop timed session",
+  "menu.settings": "Settings…",
+  "menu.quit": "Quit Lumen",
+
+  "timed.15m": "15 minutes",
+  "timed.30m": "30 minutes",
+  "timed.1h": "1 hour",
+  "timed.2h": "2 hours",
+  "timed.4h": "4 hours",
+  "timed.8h": "8 hours",
+
+  "status.notRunning": "Lumen daemon not running",
+  "status.paused": "Paused — sleep allowed",
+  "status.awake": "Awake — sleep disabled",
+  "status.armed": "Armed — watching for activity",
+
+  "reason.waiting": "Waiting for the daemon to report…",
+  "reason.notInstalled": "Open Settings › About to install the daemon.",
+
+  "window.settings": "Lumen Settings",
+
+  "install.firstRunPrompt": "Lumen needs to install a small background daemon to manage sleep. macOS will ask for your administrator password once.",
+  "install.reinstallPrompt": "Reinstall or update the Lumen background daemon? macOS will ask for your administrator password once.",
+  "install.install": "Install",
+  "install.later": "Later",
+
+  "alert.installed": "The Lumen daemon was installed and started.",
+  "alert.uninstalled": "The Lumen daemon was removed.",
+  "alert.failed": "The operation could not be completed."
+}

@@ -1,0 +1,71 @@
+{
+  "tab.general": "Основные",
+  "tab.triggers": "Триггеры",
+  "tab.safety": "Защита",
+  "tab.about": "О программе",
+
+  "field.mode": "Режим",
+  "field.language": "Язык",
+  "field.grace": "Окно бездействия",
+  "field.poll": "Интервал опроса",
+  "field.watchClaude": "Следить за сессиями Claude Code",
+  "field.watchCodex": "Следить за сессиями Codex",
+  "field.processTriggers": "Триггеры по процессам и CPU",
+  "field.cpuThreshold": "Порог CPU",
+  "field.processList": "Отслеживаемые процессы",
+  "field.batteryFloor": "Порог батареи",
+  "field.criticalBattery": "Критический заряд",
+  "field.maxHours": "Жёсткий предел",
+  "field.acOnly": "Бодрствовать только от сети",
+
+  "mode.auto": "Авто",
+  "mode.on": "Держать бодрым",
+  "mode.off": "Разрешить сон",
+  "mode.remote": "Удалённый",
+
+  "lang.system": "Системный",
+  "value.noLimit": "Без ограничения",
+
+  "hint.language": "Изменения применятся при следующем запуске приложения.",
+  "hint.processList": "Имена процессов через запятую, напр. ollama, docker, node.",
+  "hint.safety": "Защиты могут только разрешить сон — они не удерживают Mac бодрым вопреки этим лимитам.",
+
+  "about.tagline": "Держит Mac бодрым только пока идёт реальная работа агента.",
+  "about.daemonInstalled": "Фоновый демон установлен.",
+  "about.daemonMissing": "Фоновый демон не установлен.",
+  "about.install": "Установить демон…",
+  "about.reinstall": "Переустановить / обновить демон…",
+  "about.uninstall": "Удалить демон…",
+  "about.privilege": "Lumen один раз устанавливает небольшой root-демон с одним запросом пароля администратора macOS. Повседневное управление пароля не требует.",
+
+  "menu.timed": "Сессия по таймеру",
+  "menu.timedStop": "Остановить таймер",
+  "menu.settings": "Настройки…",
+  "menu.quit": "Выйти из Lumen",
+
+  "timed.15m": "15 минут",
+  "timed.30m": "30 минут",
+  "timed.1h": "1 час",
+  "timed.2h": "2 часа",
+  "timed.4h": "4 часа",
+  "timed.8h": "8 часов",
+
+  "status.notRunning": "Демон Lumen не запущен",
+  "status.paused": "Пауза — сон разрешён",
+  "status.awake": "Бодрствует — сон запрещён",
+  "status.armed": "Наготове — слежу за активностью",
+
+  "reason.waiting": "Ожидаю отчёт от демона…",
+  "reason.notInstalled": "Откройте Настройки › О программе, чтобы установить демон.",
+
+  "window.settings": "Настройки Lumen",
+
+  "install.firstRunPrompt": "Lumen нужно установить небольшой фоновый демон для управления сном. macOS один раз запросит пароль администратора.",
+  "install.reinstallPrompt": "Переустановить или обновить фоновый демон Lumen? macOS один раз запросит пароль администратора.",
+  "install.install": "Установить",
+  "install.later": "Позже",
+
+  "alert.installed": "Демон Lumen установлен и запущен.",
+  "alert.uninstalled": "Демон Lumen удалён.",
+  "alert.failed": "Не удалось выполнить операцию."
+}
