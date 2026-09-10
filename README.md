@@ -81,9 +81,23 @@ Nightly/CI builds are produced by GitHub Actions on every push (macOS + Windows 
 - [ ] Installers + auto-update (Sparkle / winget) + code signing & notarization.
 - [ ] Localization polish (en/ru/kk).
 
-### Download
+## Install
 
-Until signed installers ship, grab the latest CI build from the **[Actions tab](https://github.com/baimukhanalan/Lumen/actions/workflows/build.yml)** → newest run → **Artifacts** (`Lumen-macos`, `Lumen-windows`). These are unsigned, so macOS needs right-click → Open once, and Windows may show a SmartScreen "Run anyway".
+Grab an installer from the **[latest release](https://github.com/baimukhanalan/Lumen/releases/latest)**:
+
+- **macOS** — `Lumen-<version>.dmg` → open it, drag **Lumen** to **Applications**, launch it. On first run it installs a small background helper (one macOS password / Touch ID prompt). Add Lumen to *System Settings → General → Login Items* to have the menu-bar icon return after a restart (the keep-awake helper already auto-starts on boot).
+- **Windows** — `Lumen-Setup-<version>.exe` → run it (tick *Start at login* if you want it). The tray app runs non-elevated; it asks for elevation only when you enable lid-policy management.
+
+> Builds are currently **unsigned**. macOS: right-click → **Open** the first time (Gatekeeper). Windows: **More info → Run anyway** (SmartScreen). Signed & notarized builds ship once the signing secrets are added to CI (see below).
+
+Prefer the bleeding edge? Every push also uploads unsigned artifacts to the **[Actions tab](https://github.com/baimukhanalan/Lumen/actions/workflows/build.yml)** → newest run → **Artifacts**.
+
+### Signing (maintainers)
+
+Releases auto-sign when these repository secrets exist — otherwise they ship unsigned, no workflow change needed:
+
+- macOS: `MACOS_SIGN_IDENTITY` (Developer ID Application), `AC_API_KEY_ID`, `AC_API_ISSUER` (App Store Connect API key for notarization).
+- Windows: a code-signing certificate step (wire `signtool` into `release.yml`).
 
 ## License
 

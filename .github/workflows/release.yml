@@ -1,0 +1,59 @@
+name: release
+
+# Cutting a tag like v1.0.0 builds installers for both platforms and attaches
+# them to the GitHub Release for that tag.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build DMG
+        run: ./macos/dmg.sh
+        # Signing/notarization run automatically if these secrets exist:
+        env:
+          MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          AC_API_KEY_ID: ${{ secrets.AC_API_KEY_ID }}
+          AC_API_ISSUER: ${{ secrets.AC_API_ISSUER }}
+      - name: Attach DMG to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: dist/*.dmg
+          fail_on_unmatched_files: true
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Publish app
+        shell: pwsh
+        run: dotnet publish windows/Lumen/Lumen.csproj -c Release -r win-x64 --self-contained false -o dist/windows
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.tag || github.ref_name }}".TrimStart('v')
+          choco install innosetup -y --no-progress
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DPublishDir=$(Resolve-Path dist\windows)" "/DMyAppVersion=$ver" windows\installer\Lumen.iss
+      - name: Attach installer to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: windows/installer/Output/*.exe
+          fail_on_unmatched_files: true
