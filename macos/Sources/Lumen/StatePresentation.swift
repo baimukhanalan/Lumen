@@ -47,7 +47,7 @@ struct StatePresentation {
 
     static func resolve(config: LumenConfig,
                         state: DaemonState?,
-                        loc: Localizer) -> StatePresentation {
+                        loc: L10n) -> StatePresentation {
         let fresh = isFresh(state)
 
         // Resolve the visual state.
@@ -65,32 +65,54 @@ struct StatePresentation {
         // Title.
         let title: String
         switch ui {
-        case .unavailable: title = loc.string("status.notRunning")
-        case .paused:      title = loc.string("status.paused")
-        case .awake:       title = loc.string("status.awake")
-        case .armed:       title = loc.string("status.armed")
+        case .unavailable: title = loc.t("status.notRunning")
+        case .paused:      title = loc.t("status.paused")
+        case .awake:       title = loc.t("status.awake")
+        case .armed:       title = loc.t("status.armed")
         }
 
         // Reason detail line.
         let reason: String
         if !fresh || state == nil {
             reason = PrivilegedInstaller.isInstalled
-                ? loc.string("reason.waiting")
-                : loc.string("reason.notInstalled")
+                ? loc.t("reason.waiting")
+                : loc.t("reason.notInstalled")
         } else {
-            reason = state!.reason
+            reason = localizedReason(state!, loc: loc)
         }
 
         return StatePresentation(ui: ui, title: title, reason: reason)
     }
 
+    /// Localizes the daemon's stable `reasonKey` (interpolating any numeric
+    /// args), falling back to the raw English `reason` string when the key is
+    /// missing or unknown to the current string tables.
+    static func localizedReason(_ state: DaemonState, loc: L10n) -> String {
+        guard let key = state.reasonKey, !key.isEmpty else {
+            return state.reason
+        }
+        let template = loc.t(key)
+        // `L10n.t` returns the key itself when it is absent from every table,
+        // which means we can't localize it — fall back to the English reason.
+        if template == key {
+            return state.reason
+        }
+        let values = state.reasonValues ?? []
+        if values.isEmpty {
+            return template
+        }
+        // Match `%d` specifiers with 32-bit ints so multi-arg formats align.
+        let args = values.map { CInt($0) as CVarArg }
+        return String(format: template, arguments: args)
+    }
+
     /// Localized thermal label from the daemon's raw thermal string.
-    static func thermalLabel(_ raw: String, loc: Localizer) -> String {
+    static func thermalLabel(_ raw: String, loc: L10n) -> String {
         switch raw {
-        case "fair":     return loc.string("thermal.fair")
-        case "serious":  return loc.string("thermal.serious")
-        case "critical": return loc.string("thermal.critical")
-        default:         return loc.string("thermal.nominal")
+        case "fair":     return loc.t("thermal.fair")
+        case "serious":  return loc.t("thermal.serious")
+        case "critical": return loc.t("thermal.critical")
+        default:         return loc.t("thermal.nominal")
         }
     }
 }

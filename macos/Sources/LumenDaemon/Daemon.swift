@@ -142,6 +142,8 @@ public final class Daemon: @unchecked Sendable {
             shouldStayAwake: decision.shouldStayAwake,
             sleepDisabled: appliedDisabled,
             reason: decision.reason,
+            reasonKey: decision.reasonKey,
+            reasonValues: decision.reasonValues,
             mode: config.mode,
             sessionActive: sessionActive,
             processActive: processActive,

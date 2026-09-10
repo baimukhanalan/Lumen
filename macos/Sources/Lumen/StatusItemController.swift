@@ -6,7 +6,7 @@ import LumenCore
 final class StatusItemController: NSObject, NSMenuDelegate {
 
     private let statusItem: NSStatusItem
-    private let loc: Localizer
+    private let loc: L10n
     private let paths = Paths.forCurrentUser()
 
     private let onOpenSettings: () -> Void
@@ -19,7 +19,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private var modeItems: [LumenMode: NSMenuItem] = [:]
     private let stopTimedItem = NSMenuItem()
 
-    init(loc: Localizer,
+    init(loc: L10n,
          onOpenSettings: @escaping () -> Void,
          onInstall: @escaping () -> Void) {
         self.loc = loc
@@ -30,9 +30,24 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         buildMenu()
         refresh()
         startPolling()
+        // Rebuild the menu strings live when the language changes.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageChanged),
+            name: L10n.didChange,
+            object: nil
+        )
     }
 
-    deinit { pollTimer?.invalidate() }
+    deinit {
+        pollTimer?.invalidate()
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func languageChanged() {
+        buildMenu()
+        refresh()
+    }
 
     // MARK: - Menu construction
 
@@ -53,11 +68,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
 
         // Timed session submenu.
-        let timed = NSMenuItem(title: loc.string("menu.timed"), action: nil, keyEquivalent: "")
+        let timed = NSMenuItem(title: loc.t("menu.timed"), action: nil, keyEquivalent: "")
         timed.image = symbolImage("timer", pointSize: 13)
         let timedMenu = NSMenu()
         for (index, preset) in ControlWriter.timedPresets.enumerated() {
-            let item = NSMenuItem(title: loc.string(preset.labelKey),
+            let item = NSMenuItem(title: loc.t(preset.labelKey),
                                   action: #selector(startTimed(_:)),
                                   keyEquivalent: "")
             item.target = self
@@ -65,7 +80,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             timedMenu.addItem(item)
         }
         timedMenu.addItem(.separator())
-        stopTimedItem.title = loc.string("menu.timedStop")
+        stopTimedItem.title = loc.t("menu.timedStop")
         stopTimedItem.action = #selector(stopTimed)
         stopTimedItem.target = self
         timedMenu.addItem(stopTimedItem)
@@ -73,13 +88,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(timed)
         menu.addItem(.separator())
 
-        let settings = NSMenuItem(title: loc.string("menu.open"),
+        let settings = NSMenuItem(title: loc.t("menu.open"),
                                   action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         settings.image = symbolImage("slider.horizontal.3", pointSize: 13)
         menu.addItem(settings)
 
-        let quit = NSMenuItem(title: loc.string("menu.quit"),
+        let quit = NSMenuItem(title: loc.t("menu.quit"),
                               action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
@@ -88,7 +103,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func addModeItem(to menu: NSMenu, mode: LumenMode, key: String, keyEquivalent: String) {
-        let item = NSMenuItem(title: loc.string(key),
+        let item = NSMenuItem(title: loc.t(key),
                               action: #selector(changeMode(_:)), keyEquivalent: keyEquivalent)
         item.target = self
         item.representedObject = mode.rawValue
@@ -193,10 +208,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         // Power source (+ battery percentage when available).
         if let pct = state.batteryPercent {
-            let source = state.onBattery ? loc.string("value.onBattery") : loc.string("value.onAC")
+            let source = state.onBattery ? loc.t("value.onBattery") : loc.t("value.onAC")
             parts.append("\(source) \(pct)%")
         } else {
-            parts.append(state.onBattery ? loc.string("value.onBattery") : loc.string("value.onAC"))
+            parts.append(state.onBattery ? loc.t("value.onBattery") : loc.t("value.onAC"))
         }
 
         // Thermal (only worth showing when not nominal).
@@ -206,8 +221,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         // Agent session detected?
         let detected = state.sessionActive || state.processActive
-        parts.append(loc.string("label.session") + ": " +
-                     loc.string(detected ? "value.yes" : "value.no"))
+        parts.append(loc.t("label.session") + ": " +
+                     loc.t(detected ? "value.yes" : "value.no"))
 
         return parts.joined(separator: "  ·  ")
     }

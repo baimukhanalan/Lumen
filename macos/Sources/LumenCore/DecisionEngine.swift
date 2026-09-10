@@ -59,14 +59,27 @@ public struct DecisionInputs: Sendable {
 
 public struct Decision: Equatable, Sendable {
     public var shouldStayAwake: Bool
+    /// Human-readable English one-liner (used verbatim in the daemon log).
     public var reason: String
+    /// Stable machine key the UI localizes (e.g. "reason.activeSession").
+    public var reasonKey: String
+    /// Numeric args to interpolate into the localized `reasonKey`, in order
+    /// (e.g. battery percent then threshold, or the hard-cap hours).
+    public var reasonValues: [Int]
     /// Updated latch state to persist for the next poll.
     public var onSince: Double
     public var capped: Bool
 
-    public init(shouldStayAwake: Bool, reason: String, onSince: Double, capped: Bool) {
+    public init(shouldStayAwake: Bool,
+                reason: String,
+                reasonKey: String = "",
+                reasonValues: [Int] = [],
+                onSince: Double,
+                capped: Bool) {
         self.shouldStayAwake = shouldStayAwake
         self.reason = reason
+        self.reasonKey = reasonKey
+        self.reasonValues = reasonValues
         self.onSince = onSince
         self.capped = capped
     }
@@ -87,6 +100,8 @@ public enum DecisionEngine {
         var capped = i.capped
         var want: Bool
         var reason: String
+        var reasonKey: String
+        var reasonValues: [Int] = []
 
         if !active {
             // Idle (or manual allow-sleep) → full self-heal reset. This is the
@@ -94,12 +109,19 @@ public enum DecisionEngine {
             want = false
             onSince = 0
             capped = false
-            reason = i.forceOff ? "manual: allow sleep" : "idle — no active session"
+            if i.forceOff {
+                reason = "manual: allow sleep"
+                reasonKey = "reason.manualOff"
+            } else {
+                reason = "idle — no active session"
+                reasonKey = "reason.idle"
+            }
         } else if capped {
             // Hard cap already latched: stay asleep until an idle period clears
             // it (handled by the branch above on a future poll).
             want = false
             reason = "hard cap reached — waiting for idle to re-arm"
+            reasonKey = "reason.hardCapWaiting"
         } else {
             want = true
             if onSince == 0 { onSince = i.now }
@@ -109,11 +131,13 @@ public enum DecisionEngine {
                     want = false
                     capped = true
                     reason = "hard cap \(i.maxHours)h reached — allowing sleep until idle"
+                    reasonKey = "reason.hardCap"
+                    reasonValues = [i.maxHours]
                 } else {
-                    reason = reasonForActive(i)
+                    (reason, reasonKey) = reasonForActive(i)
                 }
             } else {
-                reason = reasonForActive(i)
+                (reason, reasonKey) = reasonForActive(i)
             }
         }
 
@@ -125,26 +149,41 @@ public enum DecisionEngine {
             if let pct = i.batteryPercent, pct <= i.criticalBatteryPercent {
                 want = false
                 reason = "critical battery \(pct)% ≤ \(i.criticalBatteryPercent)%"
+                reasonKey = "reason.criticalBattery"
+                reasonValues = [pct, i.criticalBatteryPercent]
             } else if let pct = i.batteryPercent, pct <= i.batteryFloorPercent {
                 want = false
                 reason = "battery \(pct)% ≤ floor \(i.batteryFloorPercent)%"
+                reasonKey = "reason.batteryFloor"
+                reasonValues = [pct, i.batteryFloorPercent]
             } else if i.acOnly {
                 want = false
                 reason = "AC-only mode — running on battery"
+                reasonKey = "reason.acOnly"
+                reasonValues = []
             }
         }
         if want && i.thermalSerious {
             want = false
             reason = "thermal pressure high — allowing sleep"
+            reasonKey = "reason.thermal"
+            reasonValues = []
         }
 
-        return Decision(shouldStayAwake: want, reason: reason, onSince: onSince, capped: capped)
+        return Decision(shouldStayAwake: want,
+                        reason: reason,
+                        reasonKey: reasonKey,
+                        reasonValues: reasonValues,
+                        onSince: onSince,
+                        capped: capped)
     }
 
-    private static func reasonForActive(_ i: DecisionInputs) -> String {
-        if i.forceOn { return "manual: keep awake" }
-        if i.sessionActive { return "active agent session detected" }
-        if i.processActive { return "watched process is busy" }
-        return "keeping awake"
+    /// Returns the English reason string and its stable localization key for an
+    /// active (keep-awake) decision.
+    private static func reasonForActive(_ i: DecisionInputs) -> (String, String) {
+        if i.forceOn { return ("manual: keep awake", "reason.manualOn") }
+        if i.sessionActive { return ("active agent session detected", "reason.activeSession") }
+        if i.processActive { return ("watched process is busy", "reason.processBusy") }
+        return ("keeping awake", "reason.keepAwake")
     }
 }

@@ -50,7 +50,7 @@
   "hint.mode": "Auto follows detected agent activity. Keep awake and Remote hold the Mac awake; Allow sleep overrides everything.",
   "hint.timing": "How long activity must be idle before sleeping, and how often Lumen checks.",
   "hint.sessions": "Watches Claude Code and Codex session logs for recent activity.",
-  "hint.language": "Changes apply the next time the app launches.",
+  "hint.language": "Changes apply immediately across the whole app.",
   "hint.processList": "Comma-separated executable names, e.g. ollama, docker, node.",
   "hint.safety": "Governors can only allow sleep — they never keep the Mac awake against these limits.",
 
@@ -83,6 +83,24 @@
 
   "reason.waiting": "Waiting for the daemon to report…",
   "reason.notInstalled": "Open Settings › About to install the daemon.",
+
+  "reason.starting": "Starting up",
+  "reason.idle": "Idle — no active session",
+  "reason.manualOff": "Manual: allow sleep",
+  "reason.manualOn": "Manual: keep awake",
+  "reason.activeSession": "Active agent session detected",
+  "reason.processBusy": "Watched process is busy",
+  "reason.keepAwake": "Keeping awake",
+  "reason.hardCapWaiting": "Hard cap reached — waiting for idle to re-arm",
+  "reason.hardCap": "Hard cap %dh reached — allowing sleep until idle",
+  "reason.criticalBattery": "Critical battery %d%% ≤ %d%%",
+  "reason.batteryFloor": "Battery %d%% ≤ floor %d%%",
+  "reason.acOnly": "AC-only mode — running on battery",
+  "reason.thermal": "Thermal pressure high — allowing sleep",
+
+  "unit.min": "min",
+  "unit.sec": "s",
+  "unit.hour": "h",
 
   "window.settings": "Lumen Settings",
 

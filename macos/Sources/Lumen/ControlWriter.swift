@@ -51,7 +51,7 @@ enum ControlWriter {
 
     /// Mirror the effective override onto the flag files, so the shell CLI and
     /// the daemon agree even if only one channel is used.
-    private static func syncFlags(for cfg: LumenConfig) {
+    static func syncFlags(for cfg: LumenConfig) {
         let fm = FileManager.default
         try? fm.createDirectory(atPath: paths.supportDir, withIntermediateDirectories: true)
         let nowEpoch = Date().timeIntervalSince1970

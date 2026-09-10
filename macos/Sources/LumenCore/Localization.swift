@@ -37,7 +37,7 @@ public final class Localizer: @unchecked Sendable {
 
     // MARK: - Resolution
 
-    static func resolveLanguage(_ preferred: String) -> String {
+    public static func resolveLanguage(_ preferred: String) -> String {
         if preferred != "system", supported.contains(preferred) {
             return preferred
         }

@@ -31,12 +31,13 @@ final class StatusModel: ObservableObject {
 }
 
 /// The Settings window content: a live status card plus four grouped tabs
-/// bound to the shared config. Light/dark aware via semantic colors.
+/// bound to the shared config. Light/dark aware via semantic colors, and fully
+/// reactive to language changes via the shared `L10n` manager.
 @available(macOS 12.0, *)
 struct SettingsView: View {
     @ObservedObject var model: ConfigModel
+    @ObservedObject var l10n: L10n
     @StateObject private var status = StatusModel()
-    let loc: Localizer
     /// Called when the user asks to (re)install or remove the daemon.
     var onInstall: () -> Void
     var onUninstall: () -> Void
@@ -44,25 +45,28 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            StatusCard(status: status, loc: loc)
-                .padding(16)
+            StatusCard(status: status, l10n: l10n)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 14)
 
             TabView {
-                GeneralTab(model: model, loc: loc)
-                    .tabItem { Label(loc.string("tab.general"), systemImage: "gearshape") }
-                TriggersTab(model: model, loc: loc)
-                    .tabItem { Label(loc.string("tab.triggers"), systemImage: "bolt") }
-                SafetyTab(model: model, loc: loc)
-                    .tabItem { Label(loc.string("tab.safety"), systemImage: "shield") }
-                AboutTab(loc: loc,
+                GeneralTab(model: model, l10n: l10n)
+                    .tabItem { Label(l10n.t("tab.general"), systemImage: "gearshape") }
+                TriggersTab(model: model, l10n: l10n)
+                    .tabItem { Label(l10n.t("tab.triggers"), systemImage: "bolt") }
+                SafetyTab(model: model, l10n: l10n)
+                    .tabItem { Label(l10n.t("tab.safety"), systemImage: "shield") }
+                AboutTab(l10n: l10n,
                          daemonInstalled: daemonInstalled,
                          onInstall: onInstall,
                          onUninstall: onUninstall)
-                    .tabItem { Label(loc.string("tab.about"), systemImage: "info.circle") }
+                    .tabItem { Label(l10n.t("tab.about"), systemImage: "info.circle") }
             }
-            .padding([.horizontal, .bottom], 16)
+            .padding([.horizontal, .bottom], 20)
         }
-        .frame(width: 520, height: 560)
+        .frame(width: 600, height: 660)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 }
 
@@ -71,24 +75,24 @@ struct SettingsView: View {
 @available(macOS 12.0, *)
 private struct StatusCard: View {
     @ObservedObject var status: StatusModel
-    let loc: Localizer
+    @ObservedObject var l10n: L10n
 
     private var pres: StatePresentation {
-        StatePresentation.resolve(config: status.config, state: status.state, loc: loc)
+        StatePresentation.resolve(config: status.config, state: status.state, loc: l10n)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .center, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .center, spacing: 16) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color(nsColor: pres.ui.tint).opacity(0.16))
-                        .frame(width: 52, height: 52)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color(nsColor: pres.ui.tint).opacity(0.18))
+                        .frame(width: 58, height: 58)
                     Image(systemName: pres.ui.symbol)
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(.system(size: 27, weight: .semibold))
                         .foregroundColor(Color(nsColor: pres.ui.tint))
                 }
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(pres.title)
                         .font(.title3).bold()
                         .foregroundColor(.primary)
@@ -103,22 +107,22 @@ private struct StatusCard: View {
             Divider()
 
             HStack(alignment: .top, spacing: 0) {
-                metric(label: loc.string("field.mode"), value: modeLabel)
+                metric(label: l10n.t("field.mode"), value: modeLabel)
                 divider
-                metric(label: loc.string("label.battery"), value: batteryLabel)
+                metric(label: l10n.t("label.battery"), value: batteryLabel)
                 divider
-                metric(label: loc.string("label.thermal"), value: thermalLabel)
+                metric(label: l10n.t("label.thermal"), value: thermalLabel)
                 divider
-                metric(label: loc.string("label.session"), value: sessionLabel)
+                metric(label: l10n.t("label.session"), value: sessionLabel)
             }
         }
-        .padding(16)
+        .padding(18)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
         )
     }
@@ -126,30 +130,34 @@ private struct StatusCard: View {
     private var divider: some View {
         Rectangle()
             .fill(Color(nsColor: .separatorColor))
-            .frame(width: 1, height: 30)
+            .frame(width: 1, height: 34)
     }
 
     private func metric(label: String, value: String) -> some View {
-        VStack(alignment: .center, spacing: 4) {
+        VStack(alignment: .center, spacing: 5) {
             Text(label.uppercased())
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundColor(.secondary)
-                .tracking(0.5)
-            Text(value)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.primary)
+                .tracking(0.6)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .monospacedDigit()
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
+        .padding(.horizontal, 6)
     }
 
     private var modeLabel: String {
         switch status.config.mode {
-        case .auto:   return loc.string("mode.auto")
-        case .on:     return loc.string("mode.on")
-        case .off:    return loc.string("mode.off")
-        case .remote: return loc.string("mode.remote")
+        case .auto:   return l10n.t("mode.auto")
+        case .on:     return l10n.t("mode.on")
+        case .off:    return l10n.t("mode.off")
+        case .remote: return l10n.t("mode.remote")
         }
     }
 
@@ -159,18 +167,18 @@ private struct StatusCard: View {
             let src = state.onBattery ? "🔋" : "⚡︎"
             return "\(pct)% \(src)"
         }
-        return state.onBattery ? loc.string("value.onBattery") : loc.string("value.onAC")
+        return state.onBattery ? l10n.t("value.onBattery") : l10n.t("value.onAC")
     }
 
     private var thermalLabel: String {
         guard let state = status.state, StatePresentation.isFresh(state) else { return "—" }
-        return StatePresentation.thermalLabel(state.thermal, loc: loc)
+        return StatePresentation.thermalLabel(state.thermal, loc: l10n)
     }
 
     private var sessionLabel: String {
         guard let state = status.state, StatePresentation.isFresh(state) else { return "—" }
         let detected = state.sessionActive || state.processActive
-        return loc.string(detected ? "value.yes" : "value.no")
+        return l10n.t(detected ? "value.yes" : "value.no")
     }
 }
 
@@ -187,45 +195,62 @@ private struct HelperText: View {
     }
 }
 
+/// A section header with an SF Symbol accent, matching native grouped forms.
+@available(macOS 12.0, *)
+private struct SectionHeader: View {
+    let title: String
+    let symbol: String
+    var body: some View {
+        Label(title, systemImage: symbol)
+            .font(.headline)
+            .foregroundColor(.secondary)
+    }
+}
+
 // MARK: - General
 
 @available(macOS 12.0, *)
 private struct GeneralTab: View {
     @ObservedObject var model: ConfigModel
-    let loc: Localizer
+    @ObservedObject var l10n: L10n
 
     var body: some View {
         Form {
-            Section(header: Text(loc.string("section.behavior"))) {
-                Picker(loc.string("field.mode"), selection: $model.mode) {
-                    Text(loc.string("mode.auto")).tag(LumenMode.auto)
-                    Text(loc.string("mode.on")).tag(LumenMode.on)
-                    Text(loc.string("mode.off")).tag(LumenMode.off)
-                    Text(loc.string("mode.remote")).tag(LumenMode.remote)
+            Section(header: SectionHeader(title: l10n.t("section.behavior"), symbol: "power")) {
+                Picker(l10n.t("field.mode"), selection: $model.mode) {
+                    Text(l10n.t("mode.auto")).tag(LumenMode.auto)
+                    Text(l10n.t("mode.on")).tag(LumenMode.on)
+                    Text(l10n.t("mode.off")).tag(LumenMode.off)
+                    Text(l10n.t("mode.remote")).tag(LumenMode.remote)
                 }
-                HelperText(text: loc.string("hint.mode"))
+                HelperText(text: l10n.t("hint.mode"))
             }
 
-            Section(header: Text(loc.string("section.timing"))) {
+            Section(header: SectionHeader(title: l10n.t("section.timing"), symbol: "timer")) {
                 Stepper(value: $model.graceMinutes, in: 1...120) {
-                    LabeledContentRow(label: loc.string("field.grace"),
-                                      value: "\(model.graceMinutes) min")
+                    LabeledContentRow(label: l10n.t("field.grace"),
+                                      value: "\(model.graceMinutes) \(l10n.t("unit.min"))")
                 }
                 Stepper(value: $model.pollSeconds, in: 5...300, step: 5) {
-                    LabeledContentRow(label: loc.string("field.poll"),
-                                      value: "\(model.pollSeconds) s")
+                    LabeledContentRow(label: l10n.t("field.poll"),
+                                      value: "\(model.pollSeconds) \(l10n.t("unit.sec"))")
                 }
-                HelperText(text: loc.string("hint.timing"))
+                HelperText(text: l10n.t("hint.timing"))
             }
 
-            Section(header: Text(loc.string("section.appearance"))) {
-                Picker(loc.string("field.language"), selection: $model.language) {
-                    Text(loc.string("lang.system")).tag("system")
+            Section(header: SectionHeader(title: l10n.t("section.appearance"), symbol: "globe")) {
+                Picker(l10n.t("field.language"), selection: $model.language) {
+                    Text(l10n.t("lang.system")).tag("system")
                     Text("English").tag("en")
                     Text("Русский").tag("ru")
                     Text("Қазақша").tag("kk")
                 }
-                HelperText(text: loc.string("hint.language"))
+                .onChange(of: model.language) { newValue in
+                    // Live-switch the UI now; `model.language` also persists to
+                    // config.json via its own didSet, so it survives relaunch.
+                    l10n.setLanguage(newValue)
+                }
+                HelperText(text: l10n.t("hint.language"))
             }
         }
         .formStyleGrouped()
@@ -237,29 +262,30 @@ private struct GeneralTab: View {
 @available(macOS 12.0, *)
 private struct TriggersTab: View {
     @ObservedObject var model: ConfigModel
-    let loc: Localizer
+    @ObservedObject var l10n: L10n
 
     var body: some View {
         Form {
-            Section(header: Text(loc.string("section.sessions"))) {
-                Toggle(loc.string("field.watchClaude"), isOn: $model.watchClaude)
-                Toggle(loc.string("field.watchCodex"), isOn: $model.watchCodex)
-                HelperText(text: loc.string("hint.sessions"))
+            Section(header: SectionHeader(title: l10n.t("section.sessions"), symbol: "terminal")) {
+                Toggle(l10n.t("field.watchClaude"), isOn: $model.watchClaude)
+                Toggle(l10n.t("field.watchCodex"), isOn: $model.watchCodex)
+                HelperText(text: l10n.t("hint.sessions"))
             }
 
-            Section(header: Text(loc.string("section.processes"))) {
-                Toggle(loc.string("field.processTriggers"), isOn: $model.enableProcessTriggers)
+            Section(header: SectionHeader(title: l10n.t("section.processes"), symbol: "cpu")) {
+                Toggle(l10n.t("field.processTriggers"), isOn: $model.enableProcessTriggers)
                 Stepper(value: $model.cpuThresholdPercent, in: 1...100, step: 5) {
-                    LabeledContentRow(label: loc.string("field.cpuThreshold"),
+                    LabeledContentRow(label: l10n.t("field.cpuThreshold"),
                                       value: "\(model.cpuThresholdPercent)%")
                 }
                 .disabled(!model.enableProcessTriggers)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(loc.string("field.processList"))
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(l10n.t("field.processList"))
+                        .foregroundColor(model.enableProcessTriggers ? .primary : .secondary)
                     TextField("ollama, docker, node", text: $model.processListText)
                         .textFieldStyle(.roundedBorder)
                         .disabled(!model.enableProcessTriggers)
-                    HelperText(text: loc.string("hint.processList"))
+                    HelperText(text: l10n.t("hint.processList"))
                 }
             }
         }
@@ -272,30 +298,30 @@ private struct TriggersTab: View {
 @available(macOS 12.0, *)
 private struct SafetyTab: View {
     @ObservedObject var model: ConfigModel
-    let loc: Localizer
+    @ObservedObject var l10n: L10n
 
     var body: some View {
         Form {
-            Section(header: Text(loc.string("section.power"))) {
+            Section(header: SectionHeader(title: l10n.t("section.power"), symbol: "battery.50")) {
                 Stepper(value: $model.batteryFloorPercent, in: 0...100, step: 5) {
-                    LabeledContentRow(label: loc.string("field.batteryFloor"),
+                    LabeledContentRow(label: l10n.t("field.batteryFloor"),
                                       value: "\(model.batteryFloorPercent)%")
                 }
                 Stepper(value: $model.criticalBatteryPercent, in: 0...100, step: 5) {
-                    LabeledContentRow(label: loc.string("field.criticalBattery"),
+                    LabeledContentRow(label: l10n.t("field.criticalBattery"),
                                       value: "\(model.criticalBatteryPercent)%")
                 }
-                Toggle(loc.string("field.acOnly"), isOn: $model.acOnly)
+                Toggle(l10n.t("field.acOnly"), isOn: $model.acOnly)
             }
 
-            Section(header: Text(loc.string("section.duration"))) {
+            Section(header: SectionHeader(title: l10n.t("section.duration"), symbol: "hourglass")) {
                 Stepper(value: $model.maxHours, in: 0...48) {
                     LabeledContentRow(
-                        label: loc.string("field.maxHours"),
-                        value: model.maxHours == 0 ? loc.string("value.noLimit")
-                                                   : "\(model.maxHours) h")
+                        label: l10n.t("field.maxHours"),
+                        value: model.maxHours == 0 ? l10n.t("value.noLimit")
+                                                   : "\(model.maxHours) \(l10n.t("unit.hour"))")
                 }
-                HelperText(text: loc.string("hint.safety"))
+                HelperText(text: l10n.t("hint.safety"))
             }
         }
         .formStyleGrouped()
@@ -306,7 +332,7 @@ private struct SafetyTab: View {
 
 @available(macOS 12.0, *)
 private struct AboutTab: View {
-    let loc: Localizer
+    @ObservedObject var l10n: L10n
     let daemonInstalled: Bool
     var onInstall: () -> Void
     var onUninstall: () -> Void
@@ -317,51 +343,71 @@ private struct AboutTab: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
+            // Identity.
+            HStack(spacing: 14) {
                 Image(systemName: "bolt.circle.fill")
-                    .font(.system(size: 40))
+                    .font(.system(size: 46))
                     .foregroundColor(.accentColor)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Lumen").font(.title2).bold()
-                    Text("v\(version)").foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Lumen").font(.title).bold()
+                    Text("v\(version)")
+                        .font(.callout)
+                        .monospacedDigit()
+                        .foregroundColor(.secondary)
                 }
+                Spacer(minLength: 0)
             }
 
-            Text(loc.string("about.tagline"))
+            Text(l10n.t("about.tagline"))
+                .font(.body)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Divider()
-
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(daemonInstalled ? Color.green : Color.orange)
-                    .frame(width: 10, height: 10)
-                Text(daemonInstalled ? loc.string("about.daemonInstalled")
-                                     : loc.string("about.daemonMissing"))
-            }
-            HStack {
-                Button(daemonInstalled ? loc.string("about.reinstall")
-                                       : loc.string("about.install"),
-                       action: onInstall)
-                if daemonInstalled {
-                    Button(loc.string("about.uninstall"), action: onUninstall)
+            // Daemon status card.
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 9) {
+                    Circle()
+                        .fill(daemonInstalled ? Color.green : Color.orange)
+                        .frame(width: 10, height: 10)
+                    Text(daemonInstalled ? l10n.t("about.daemonInstalled")
+                                         : l10n.t("about.daemonMissing"))
+                        .font(.callout).fontWeight(.medium)
+                    Spacer(minLength: 0)
+                }
+                HStack(spacing: 10) {
+                    Button(daemonInstalled ? l10n.t("about.reinstall")
+                                           : l10n.t("about.install"),
+                           action: onInstall)
+                    if daemonInstalled {
+                        Button(l10n.t("about.uninstall"), action: onUninstall)
+                    }
                 }
             }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
+            )
 
             Link(destination: URL(string: "https://github.com/baimukhanalan/Lumen")!) {
-                Label(loc.string("about.github"), systemImage: "arrow.up.right.square")
+                Label(l10n.t("about.github"), systemImage: "arrow.up.right.square")
             }
+            .buttonStyle(.link)
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            Text(loc.string("about.privilege"))
+            Text(l10n.t("about.privilege"))
                 .font(.footnote).foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(20)
+        .padding(22)
     }
 }
 

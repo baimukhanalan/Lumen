@@ -66,6 +66,10 @@ final class ConfigModel: ObservableObject {
         c.mode = mode
         c.language = language
         ConfigStore.save(c, to: paths.configFile)
+        // Keep the force-on/force-off flag files in sync with the mode picked
+        // here, so the menu-bar menu and the settings window never disagree
+        // (same logic the menu uses via ControlWriter.setMode).
+        ControlWriter.syncFlags(for: c)
     }
 
     private func clamp(_ v: Int, _ lo: Int, _ hi: Int) -> Int { min(max(v, lo), hi) }

@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Cross-process signal (from a second launch) asking us to open Settings.
     static let openSettingsNotification = Notification.Name("com.lumen.openSettings")
 
-    private var localizer: Localizer!
+    private var l10n: L10n!
     private var statusController: StatusItemController!
     private var settingsWindow: SettingsWindowController?
 
@@ -21,10 +21,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ConfigStore.ensureExists(at: paths.configFile)
         let config = ConfigStore.load(at: paths.configFile)
         let resources = Bundle.main.resourcePath
-        localizer = Localizer(resourcesDir: resources, preferred: config.language)
+        // Reactive localization manager: initialized in the configured language
+        // so the app launches correctly localized, then re-publishes live when
+        // the language is changed from Settings.
+        l10n = L10n(resourcesDir: resources, preferred: config.language)
 
         statusController = StatusItemController(
-            loc: localizer,
+            loc: l10n,
             onOpenSettings: { [weak self] in self?.showSettings() },
             onInstall: { [weak self] in self?.installIfNeeded(force: true) }
         )
@@ -68,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showSettings() {
         if settingsWindow == nil {
-            settingsWindow = SettingsWindowController(loc: localizer)
+            settingsWindow = SettingsWindowController(l10n: l10n)
         }
         settingsWindow?.show()
     }
@@ -81,21 +84,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let alert = NSAlert()
         alert.messageText = "Lumen"
         alert.informativeText = PrivilegedInstaller.isInstalled
-            ? localizer.string("install.reinstallPrompt")
-            : localizer.string("install.firstRunPrompt")
-        alert.addButton(withTitle: localizer.string("install.install"))
-        alert.addButton(withTitle: localizer.string("install.later"))
+            ? l10n.t("install.reinstallPrompt")
+            : l10n.t("install.firstRunPrompt")
+        alert.addButton(withTitle: l10n.t("install.install"))
+        alert.addButton(withTitle: l10n.t("install.later"))
         NSApp.activate(ignoringOtherApps: true)
         guard alert.runModal() == .alertFirstButtonReturn else { return }
 
         let result = PrivilegedInstaller.installOrUpdate()
         switch result {
         case .success:
-            info(localizer.string("alert.installed"))
+            info(l10n.t("alert.installed"))
         case .cancelled:
             break
         case .failure(let message):
-            info(localizer.string("alert.failed") + "\n\n" + message)
+            info(l10n.t("alert.failed") + "\n\n" + message)
         }
     }
 

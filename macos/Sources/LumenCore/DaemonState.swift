@@ -11,8 +11,16 @@ public struct DaemonState: Codable, Equatable, Sendable {
     public var shouldStayAwake: Bool
     /// What `pmset` reports right now (`disablesleep`), i.e. the applied state.
     public var sleepDisabled: Bool
-    /// Human-readable one-liner explaining the current decision.
+    /// Human-readable English one-liner explaining the current decision.
+    /// Kept for the daemon log and as the UI's fallback if `reasonKey` is
+    /// missing or unknown.
     public var reason: String
+    /// Stable machine key the UI localizes (e.g. "reason.activeSession").
+    /// Optional for backward tolerance with state files from older daemons.
+    public var reasonKey: String?
+    /// Numeric args to interpolate into the localized `reasonKey`, in order.
+    /// Optional for backward tolerance with older state files.
+    public var reasonValues: [Int]?
     public var mode: LumenMode
 
     // Inputs, surfaced for the UI's status detail.
@@ -35,6 +43,8 @@ public struct DaemonState: Codable, Equatable, Sendable {
         shouldStayAwake: false,
         sleepDisabled: false,
         reason: "starting up",
+        reasonKey: "reason.starting",
+        reasonValues: [],
         mode: .auto,
         sessionActive: false,
         processActive: false,
@@ -52,6 +62,8 @@ public struct DaemonState: Codable, Equatable, Sendable {
         shouldStayAwake: Bool,
         sleepDisabled: Bool,
         reason: String,
+        reasonKey: String? = nil,
+        reasonValues: [Int]? = nil,
         mode: LumenMode,
         sessionActive: Bool,
         processActive: Bool,
@@ -67,6 +79,8 @@ public struct DaemonState: Codable, Equatable, Sendable {
         self.shouldStayAwake = shouldStayAwake
         self.sleepDisabled = sleepDisabled
         self.reason = reason
+        self.reasonKey = reasonKey
+        self.reasonValues = reasonValues
         self.mode = mode
         self.sessionActive = sessionActive
         self.processActive = processActive
