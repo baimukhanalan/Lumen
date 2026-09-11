@@ -60,11 +60,16 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(headerItem)
         menu.addItem(.separator())
 
-        // Modes (radio-style checkmarks).
-        addModeItem(to: menu, mode: .auto, key: "mode.auto", keyEquivalent: "1")
-        addModeItem(to: menu, mode: .on, key: "mode.on", keyEquivalent: "2")
-        addModeItem(to: menu, mode: .off, key: "mode.off", keyEquivalent: "3")
-        addModeItem(to: menu, mode: .remote, key: "mode.remote", keyEquivalent: "4")
+        // Modes (radio-style checkmarks) under a small caption.
+        menu.addItem(captionItem(loc.t("menu.modeCaption")))
+        addModeItem(to: menu, mode: .auto, key: "mode.auto",
+                    symbol: "sparkles", keyEquivalent: "1")
+        addModeItem(to: menu, mode: .on, key: "mode.on",
+                    symbol: "bolt.fill", keyEquivalent: "2")
+        addModeItem(to: menu, mode: .off, key: "mode.off",
+                    symbol: "moon.fill", keyEquivalent: "3")
+        addModeItem(to: menu, mode: .remote, key: "mode.remote",
+                    symbol: "antenna.radiowaves.left.and.right", keyEquivalent: "4")
         menu.addItem(.separator())
 
         // Timed session submenu.
@@ -97,18 +102,33 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let quit = NSMenuItem(title: loc.t("menu.quit"),
                               action: #selector(quit), keyEquivalent: "q")
         quit.target = self
+        quit.image = symbolImage("power", pointSize: 13)
         menu.addItem(quit)
 
         statusItem.menu = menu
     }
 
-    private func addModeItem(to menu: NSMenu, mode: LumenMode, key: String, keyEquivalent: String) {
+    private func addModeItem(to menu: NSMenu, mode: LumenMode, key: String,
+                             symbol: String, keyEquivalent: String) {
         let item = NSMenuItem(title: loc.t(key),
                               action: #selector(changeMode(_:)), keyEquivalent: keyEquivalent)
         item.target = self
         item.representedObject = mode.rawValue
+        item.image = symbolImage(symbol, pointSize: 13)
         modeItems[mode] = item
         menu.addItem(item)
+    }
+
+    /// A small, disabled, all-caps caption used to head a group of items.
+    private func captionItem(_ text: String) -> NSMenuItem {
+        let item = NSMenuItem()
+        item.isEnabled = false
+        item.attributedTitle = NSAttributedString(string: text.uppercased(), attributes: [
+            .font: NSFont.systemFont(ofSize: 10, weight: .semibold),
+            .foregroundColor: NSColor.tertiaryLabelColor,
+            .kern: 0.5,
+        ])
+        return item
     }
 
     // MARK: - Polling & refresh

@@ -21,12 +21,16 @@ enum LumenUIState {
 
     /// Accent colour used for the icon in the Settings card (the menu-bar icon
     /// stays a monochrome template to match the system).
+    ///
+    /// Per-state palette: awake = amber (actively holding the Mac awake),
+    /// watching = blue (armed, calmly observing), paused = orange (user chose
+    /// to allow sleep), unavailable = neutral gray (nothing to report yet).
     var tint: NSColor {
         switch self {
         case .awake:       return .systemYellow
-        case .armed:       return .systemGreen
-        case .paused:      return .systemGray
-        case .unavailable: return .systemOrange
+        case .armed:       return .systemBlue
+        case .paused:      return .systemOrange
+        case .unavailable: return .systemGray
         }
     }
 }
